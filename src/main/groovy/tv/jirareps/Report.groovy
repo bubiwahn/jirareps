@@ -71,55 +71,57 @@ class Report {
 		
 	}
 		
-	static class Epic {
+	static class Item {
 		final String name
-		Integer countIssuesTotal = 0
-		Integer countIssuesEstimated = 0
-		Integer countIssuesCompleted = 0
-		Double estimatedEffortEpic = 0.0
-		Double estimatedEffortIssues = 0.0
-		Double effortCompleted = 0.0
-		Epic (String name) {
+		final String status
+		Double effortEstimated = 0.0
+		Integer issuesTotal = 0
+		Integer issuesEstimated = 0
+		Integer issuesDone = 0
+		Double effortTodo = 0.0
+		Double effortDone = 0.0
+		Item (String name) {
 			this.name = name
 		}
-	}
-	private Map<String, Epic> epics = new HashMap()
+	} 
 	
-	private Integer countIssues = 0;
-	private Integer countEpics = 0
-	private Integer countUserStories = 0
-	private Integer countDefects = 0
+	final Map<String, Item> epics = new HashMap()
+	final Map<String, Item> releases = new HashMap()
+	final Item all = new Item()
 	
-	private Epic getEpic(Issue issue) {
-		Epic epic = epics.get(issue.type == Issue.Type.Epic ? issue.key : issue.epicLink);
-		if(epic == null) {
-			epic = new Epic(issue.epicName);
-			epics.put(issue.key, epic)
+	Item getItem(String name, Map<String, Item> map) {
+		Item item = map.get(name)
+		if(item == null) {
+			item = new Item(name)
+			map.put(name, item)
 		}
-		return epic
+		return item	
 	}
 	
+			
 	void addIssue(Issue issue) {
+		println issue.key + ", " + issue.epicLink + ", " + issue.epicName + ", " + issue.estimatedEffortDays + ", " + issue.status + ", " + issue.type + ", " + issue.fixVersion 
+		final Double effortEstimated = issue.estimatedEffortDays != null ? issue.estimatedEffortDays : 0.0
 		if(issue.type == Issue.Type.Epic) {
-			countEpics++
-			Epic epic = getEpic(issue);
-			epic.estimatedEffortEpic = issue.estimatedEffortDays 
+			Item epic = getItem(issue.epicName)
+			epic.effortEstimated = effortEstimated 
+			Item release = getItem(issue.fixVersion != null ? issue.fixVersion : "EverythingElse", releases)
+			release.effortEstimated += effortEstimated 
 		}
 		else {
-     		countIssues++
-			if(issue.type == Issue.Type.UserStory) 
-				countUserStories++
-			else if(issue.type == Issue.Type.Defect)
-				countDefects++
-			Epic epic = getEpic(issue)
-			epic.countIssuesTotal++
-			epic.estimatedEffortIssues += issue.estimatedEffortDays != null ? issue.estimatedEffortDays : 0.0
-			if(issue.status == Report.Issue.Status.Completed) {
-				epic.countIssuesCompleted++
-				epic.effortCompleted += issue.estimatedEffortDays
+			Item epic = getItem(issue.epicLink)
+			epic.issuesTotal++
+			switch(issue.status) {
+				case Report.Issue.Status.Completed:
+				case Report.Issue.Status.Cancelled:
+				    epic.issuesDone++
+	                epic.effortDone += effortEstimated		
+				    break
+				default:
+					epic.effortTodo += effortEstimated
 			}
+			if(issue.estimatedEffortDays != null) epic.issuesEstimated++ 
 		}
-		println issue.key + ", " + issue.epicLink + ", " + issue.epicName + ", " + issue.estimatedEffortDays + ", " + issue.status + ", " + issue.type + ", " + issue.fixVersion 
 	}
 	
 	void make() {
@@ -127,6 +129,9 @@ class Report {
 	}
 	
 	void print() {
+		for(Item epic: epics) {
+			println  " > '${epic.name}'"
+		}
 		println "#Epics = ${countEpics}"
 		println "#UserStories = ${countUserStories}"
 		println "#Defects = ${countDefects}"
