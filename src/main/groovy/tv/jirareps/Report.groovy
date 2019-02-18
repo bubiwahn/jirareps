@@ -72,16 +72,17 @@ class Report {
 	}
 		
 	static class Item {
-		final String name
-		final String status
+		final String key
+		String name
+		String fixVersion
 		Double effortEstimated = 0.0
 		Integer issuesTotal = 0
 		Integer issuesEstimated = 0
 		Integer issuesDone = 0
-		Double effortTodo = 0.0
-		Double effortDone = 0.0
-		Item (String name) {
-			this.name = name
+		Double effortIssuesTotal = 0.0
+		Double effortIssuesDone = 0.0
+		Item (String key) {
+			this.key = key
 		}
 	} 
 	
@@ -89,52 +90,67 @@ class Report {
 	final Map<String, Item> releases = new HashMap()
 	final Item all = new Item()
 	
-	Item getItem(String name, Map<String, Item> map) {
-		Item item = map.get(name)
+	Item getItem(String key, Map<String, Item> map) {
+		Item item = map.get(key)
 		if(item == null) {
-			item = new Item(name)
-			map.put(name, item)
+			item = new Item(key)
+			map.put(key, item)
 		}
 		return item	
 	}
-	
-			
+		
 	void addIssue(Issue issue) {
 		println issue.key + ", " + issue.epicLink + ", " + issue.epicName + ", " + issue.estimatedEffortDays + ", " + issue.status + ", " + issue.type + ", " + issue.fixVersion 
 		final Double effortEstimated = issue.estimatedEffortDays != null ? issue.estimatedEffortDays : 0.0
 		if(issue.type == Issue.Type.Epic) {
-			Item epic = getItem(issue.epicName)
+			Item epic = getItem(issue.key, epics)
+			epic.name = issue.epicName
+			epic.fixVersion = issue.fixVersion
 			epic.effortEstimated = effortEstimated 
-			Item release = getItem(issue.fixVersion != null ? issue.fixVersion : "EverythingElse", releases)
-			release.effortEstimated += effortEstimated 
 		}
 		else {
-			Item epic = getItem(issue.epicLink)
+			Item epic = getItem(issue.epicLink, epics)
 			epic.issuesTotal++
+			epic.effortIssuesTotal += effortEstimated
 			switch(issue.status) {
 				case Report.Issue.Status.Completed:
 				case Report.Issue.Status.Cancelled:
 				    epic.issuesDone++
-	                epic.effortDone += effortEstimated		
+	                epic.effortIssuesDone += effortEstimated		
 				    break
 				default:
-					epic.effortTodo += effortEstimated
+					break
 			}
-			if(issue.estimatedEffortDays != null) epic.issuesEstimated++ 
+			if(issue.estimatedEffortDays != null) {
+				epic.issuesEstimated++
+			}
 		}
 	}
 	
+	Integer numberOfIssuesEstimatedTotal = 0
+	Double sumOfEffortIssuesEstimatedTotal = 0.0
+	Double estimatedEffortPerIssueAverage = 0.0
+	
 	void make() {
-		
+		for(Item epic: epics.values()) {
+			numberOfIssuesEstimatedTotal += epic.issuesEstimated
+			sumOfEffortIssuesEstimatedTotal += epic.effortIssuesTotal
+		}
+		estimatedEffortPerIssueAverage = sumOfEffortIssuesEstimatedTotal / numberOfIssuesEstimatedTotal
 	}
 	
 	void print() {
-		for(Item epic: epics) {
-			println  " > '${epic.name}'"
+		for(Item epic: epics.values()) {
+			println " > ${epic.key}, ${epic.fixVersion}, ${epic.issuesTotal}, ${epic.issuesEstimated}, ${epic.issuesDone}, ${epic.effortEstimated}, ${epic.effortIssuesTotal}, ${epic.effortIssuesDone}, ${epic.name}"
 		}
-		println "#Epics = ${countEpics}"
-		println "#UserStories = ${countUserStories}"
-		println "#Defects = ${countDefects}"
-		println "#Issues = ${countIssues}"
+		println "number of issues estimated total = ${numberOfIssuesEstimatedTotal}"
+		println "sum of effort of estimated issues total = ${sumOfEffortIssuesEstimatedTotal}"
+		println "estimated effort per issue average = ${estimatedEffortPerIssueAverage}"
+		
+		
+//		println "#Epics = ${countEpics}"
+//		println "#UserStories = ${countUserStories}"
+//		println "#Defects = ${countDefects}"
+//		println "#Issues = ${countIssues}"
 	}
 }

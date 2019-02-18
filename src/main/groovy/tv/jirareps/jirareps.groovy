@@ -13,5 +13,6 @@ Report report = new Report()
 for(Object issue: result.issues) {
 	report.addIssue(new Report.Issue(issue))
 }
+report.make()
 report.print()
 
