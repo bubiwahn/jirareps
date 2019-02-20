@@ -71,16 +71,22 @@ class Report {
 		
 	}
 		
+	Integer numberOfIssuesEstimatedTotal = 0
+	Double sumOfEffortIssuesEstimatedTotal = 0.0
+	Double estimatedEffortPerIssueAverage = 0.0
+
 	static class Item {
 		final String key
 		String name
-		String fixVersion
+		String release
 		Double effortEstimated = 0.0
 		Integer issuesTotal = 0
 		Integer issuesEstimated = 0
 		Integer issuesDone = 0
 		Double effortIssuesTotal = 0.0
 		Double effortIssuesDone = 0.0
+		Double effortRemaining = 0.0
+		Double completed = 0.0
 		Item (String key) {
 			this.key = key
 		}
@@ -100,12 +106,12 @@ class Report {
 	}
 		
 	void addIssue(Issue issue) {
-		println issue.key + ", " + issue.epicLink + ", " + issue.epicName + ", " + issue.estimatedEffortDays + ", " + issue.status + ", " + issue.type + ", " + issue.fixVersion 
+		// println issue.key + ", " + issue.epicLink + ", " + issue.epicName + ", " + issue.estimatedEffortDays + ", " + issue.status + ", " + issue.type + ", " + issue.fixVersion 
 		final Double effortEstimated = issue.estimatedEffortDays != null ? issue.estimatedEffortDays : 0.0
 		if(issue.type == Issue.Type.Epic) {
 			Item epic = getItem(issue.key, epics)
 			epic.name = issue.epicName
-			epic.fixVersion = issue.fixVersion
+			epic.release = issue.fixVersion
 			epic.effortEstimated = effortEstimated 
 		}
 		else {
@@ -123,25 +129,95 @@ class Report {
 			}
 			if(issue.estimatedEffortDays != null) {
 				epic.issuesEstimated++
+				numberOfIssuesEstimatedTotal++
+				sumOfEffortIssuesEstimatedTotal += effortEstimated
 			}
 		}
 	}
 	
-	Integer numberOfIssuesEstimatedTotal = 0
-	Double sumOfEffortIssuesEstimatedTotal = 0.0
-	Double estimatedEffortPerIssueAverage = 0.0
 	
 	void make() {
-		for(Item epic: epics.values()) {
-			numberOfIssuesEstimatedTotal += epic.issuesEstimated
-			sumOfEffortIssuesEstimatedTotal += epic.effortIssuesTotal
-		}
+		
+		// calculate average estimated effort per issue
 		estimatedEffortPerIssueAverage = sumOfEffortIssuesEstimatedTotal / numberOfIssuesEstimatedTotal
+		
+		// process epics
+		epics.values().each { item ->
+			
+			item.effortIssuesTotal += (item.issuesTotal - item.issuesEstimated) * estimatedEffortPerIssueAverage
+			item.effortRemaining = item.effortIssuesTotal - item.effortIssuesDone
+			item.completed = item.effortIssuesDone / item.effortIssuesTotal
+			
+			Item release = getItem(item.release, releases)
+			release.issuesTotal += item.issuesTotal
+			release.issuesEstimated += item.issuesEstimated
+			release.issuesDone += item.issuesDone
+			release.effortEstimated += item.effortEstimated
+			release.effortIssuesTotal += item.effortIssuesTotal
+			release.effortIssuesDone += item.effortIssuesDone
+			release.effortRemaining += item.effortRemaining
+		}
+
+		// process releases
+		releases.values().each { item ->
+			item.completed = item.effortIssuesDone / item.effortIssuesTotal
+			
+			all.issuesTotal += item.issuesTotal
+			all.issuesEstimated += item.issuesEstimated
+			all.issuesDone += item.issuesDone
+			all.effortEstimated += item.effortEstimated
+			all.effortIssuesTotal += item.effortIssuesTotal
+			all.effortIssuesDone += item.effortIssuesDone
+		}
+
+		all.completed = all.effortIssuesDone / all.effortIssuesTotal
+	
 	}
 	
 	void print() {
-		for(Item epic: epics.values()) {
-			println " > ${epic.key}, ${epic.fixVersion}, ${epic.issuesTotal}, ${epic.issuesEstimated}, ${epic.issuesDone}, ${epic.effortEstimated}, ${epic.effortIssuesTotal}, ${epic.effortIssuesDone}, ${epic.name}"
+		
+	    println "key, release, issuesTotal, issuesEstimated, issuesDone, effortEstimated, effortIssuesTotal, effortIssuesDone, effortRemaining, completed, name"
+		epics.values().each { item -> 
+			final String key = "${item.key}".padLeft(8)
+			final String release = "${item.release}".padLeft(8)
+			final String issuesTotal = "${item.issuesTotal}".padLeft(3)
+			final String issuesEstimated = "${item.issuesEstimated}".padLeft(3)
+			final String issuesDone = "${item.issuesDone}".padLeft(3)
+			final String effortEstimated = "${item.effortEstimated.round(2)}".padLeft(8)
+			final String effortIssuesTotal = "${item.effortIssuesTotal.round(2)}".padLeft(8)
+			final String effortIssuesDone = "${item.effortIssuesDone.round(2)}".padLeft(8)
+			final String effortRemaining = "${item.effortRemaining.round(2)}".padLeft(8)
+			final String completed = "${item.completed.round(2)}".padLeft(8)
+			final String name = "${item.name}"
+			println "${key}', ${release}, ${issuesTotal}, ${issuesEstimated}, ${issuesDone}, ${effortEstimated}, ${effortIssuesTotal}, ${effortIssuesDone}, ${effortRemaining}, ${completed}, '${name}'"
+		}
+		releases.values().each { item -> 
+			final String key = "${item.key}".padLeft(8)
+			final String release = "RELEASE".padLeft(8)
+			final String issuesTotal = "${item.issuesTotal}".padLeft(3)
+			final String issuesEstimated = "${item.issuesEstimated}".padLeft(3)
+			final String issuesDone = "${item.issuesDone}".padLeft(3)
+			final String effortEstimated = "${item.effortEstimated.round(2)}".padLeft(8)
+			final String effortIssuesTotal = "${item.effortIssuesTotal.round(2)}".padLeft(8)
+			final String effortIssuesDone = "${item.effortIssuesDone.round(2)}".padLeft(8)
+			final String effortRemaining = "${item.effortRemaining.round(2)}".padLeft(8)
+			final String completed = "${item.completed.round(2)}".padLeft(8)
+			final String name = "RELEASE ${item.key}"
+			println "${key}', ${release}, ${issuesTotal}, ${issuesEstimated}, ${issuesDone}, ${effortEstimated}, ${effortIssuesTotal}, ${effortIssuesDone}, ${effortRemaining}, ${completed}, '${name}'"
+		}
+		[all].each { item -> 
+			final String key = "ALL".padLeft(8)
+			final String release = "ALL".padLeft(8)
+			final String issuesTotal = "${item.issuesTotal}".padLeft(3)
+			final String issuesEstimated = "${item.issuesEstimated}".padLeft(3)
+			final String issuesDone = "${item.issuesDone}".padLeft(3)
+			final String effortEstimated = "${item.effortEstimated.round(2)}".padLeft(8)
+			final String effortIssuesTotal = "${item.effortIssuesTotal.round(2)}".padLeft(8)
+			final String effortIssuesDone = "${item.effortIssuesDone.round(2)}".padLeft(8)
+			final String effortRemaining = "${item.effortRemaining.round(2)}".padLeft(8)
+			final String completed = "${item.completed.round(2)}".padLeft(8)
+			final String name = "ALL"
+			println "${key}', ${release}, ${issuesTotal}, ${issuesEstimated}, ${issuesDone}, ${effortEstimated}, ${effortIssuesTotal}, ${effortIssuesDone}, ${effortRemaining}, ${completed}, '${name}'"
 		}
 		println "number of issues estimated total = ${numberOfIssuesEstimatedTotal}"
 		println "sum of effort of estimated issues total = ${sumOfEffortIssuesEstimatedTotal}"
