@@ -176,27 +176,29 @@ class Report {
 	
 	void print() {
 		
-	    println "key, release, issuesTotal, issuesEstimated, issuesDone, effortEstimated, effortIssuesTotal, effortIssuesDone, effortRemaining, completed, name"
+	    println "        |         | number| number| number|  effort |  effort |  effort |  effort | effort  |     "
+	    println "        |         | issues| issues| issues|  epic   |  issues |  issues |  issues | based   |     "
+	    println "     key|  release| total | estim.| done  |  estim. |  total  |  done   |  remain.| progress| name"
 		epics.values().each { item -> 
 			final String key = "${item.key}".padLeft(8)
 			final String release = "${item.release}".padLeft(8)
-			final String issuesTotal = "${item.issuesTotal}".padLeft(3)
-			final String issuesEstimated = "${item.issuesEstimated}".padLeft(3)
-			final String issuesDone = "${item.issuesDone}".padLeft(3)
+			final String issuesTotal = "${item.issuesTotal}".padLeft(6)
+			final String issuesEstimated = "${item.issuesEstimated}".padLeft(6)
+			final String issuesDone = "${item.issuesDone}".padLeft(6)
 			final String effortEstimated = "${item.effortEstimated.round(2)}".padLeft(8)
 			final String effortIssuesTotal = "${item.effortIssuesTotal.round(2)}".padLeft(8)
 			final String effortIssuesDone = "${item.effortIssuesDone.round(2)}".padLeft(8)
 			final String effortRemaining = "${item.effortRemaining.round(2)}".padLeft(8)
 			final String completed = "${item.completed.round(2)}".padLeft(8)
 			final String name = "${item.name}"
-			println "${key}', ${release}, ${issuesTotal}, ${issuesEstimated}, ${issuesDone}, ${effortEstimated}, ${effortIssuesTotal}, ${effortIssuesDone}, ${effortRemaining}, ${completed}, '${name}'"
+			println "${key}, ${release}, ${issuesTotal}, ${issuesEstimated}, ${issuesDone}, ${effortEstimated}, ${effortIssuesTotal}, ${effortIssuesDone}, ${effortRemaining}, ${completed}, '${name}'"
 		}
 		releases.values().each { item -> 
 			final String key = "${item.key}".padLeft(8)
 			final String release = "RELEASE".padLeft(8)
-			final String issuesTotal = "${item.issuesTotal}".padLeft(3)
-			final String issuesEstimated = "${item.issuesEstimated}".padLeft(3)
-			final String issuesDone = "${item.issuesDone}".padLeft(3)
+			final String issuesTotal = "${item.issuesTotal}".padLeft(6)
+			final String issuesEstimated = "${item.issuesEstimated}".padLeft(6)
+			final String issuesDone = "${item.issuesDone}".padLeft(6)
 			final String effortEstimated = "${item.effortEstimated.round(2)}".padLeft(8)
 			final String effortIssuesTotal = "${item.effortIssuesTotal.round(2)}".padLeft(8)
 			final String effortIssuesDone = "${item.effortIssuesDone.round(2)}".padLeft(8)
@@ -208,9 +210,9 @@ class Report {
 		[all].each { item -> 
 			final String key = "ALL".padLeft(8)
 			final String release = "ALL".padLeft(8)
-			final String issuesTotal = "${item.issuesTotal}".padLeft(3)
-			final String issuesEstimated = "${item.issuesEstimated}".padLeft(3)
-			final String issuesDone = "${item.issuesDone}".padLeft(3)
+			final String issuesTotal = "${item.issuesTotal}".padLeft(6)
+			final String issuesEstimated = "${item.issuesEstimated}".padLeft(6)
+			final String issuesDone = "${item.issuesDone}".padLeft(6)
 			final String effortEstimated = "${item.effortEstimated.round(2)}".padLeft(8)
 			final String effortIssuesTotal = "${item.effortIssuesTotal.round(2)}".padLeft(8)
 			final String effortIssuesDone = "${item.effortIssuesDone.round(2)}".padLeft(8)
