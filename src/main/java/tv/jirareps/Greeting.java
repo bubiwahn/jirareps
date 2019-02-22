@@ -1,4 +1,4 @@
-package hello;
+package tv.jirareps;
 
 public class Greeting {
 

@@ -56,6 +56,12 @@
   <build>
     <plugins>
     
+      <!-- package application as self contained java app -->
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+
       <!-- enable maven compiler plugin to compile groovy sources -->
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
