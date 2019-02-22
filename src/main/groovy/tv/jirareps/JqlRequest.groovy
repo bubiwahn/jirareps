@@ -11,7 +11,11 @@ class JqlRequest {
 		String.metaClass.encodeURL = {
 			java.net.URLEncoder.encode(delegate, "UTF-8")
 		}
-		return invoke("search", "jql=" + jql.encodeURL(), "startAt=" + startAt.toString().encodeURL(), "maxResults=" + maxResults.toString().encodeURL(), , "fields=" + fields.encodeURL())
+		Object result = invoke("search", "jql=" + jql.encodeURL(), "startAt=" + startAt.toString().encodeURL(), "maxResults=" + maxResults.toString().encodeURL(), , "fields=" + fields.encodeURL())
+		
+		if(maxResults < result.total)
+			throw new RuntimeException("Invocation result exceeds number of expected elements. Please implement a better solution")
+        return result    
 	}
 	
 	static Object invoke(String service, String ... args) throws IOException {

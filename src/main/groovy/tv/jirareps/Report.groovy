@@ -135,9 +135,11 @@ class Report {
 		}
 	}
 	
-	
-	void make() {
-		
+	/**
+	 * Make final completion.
+	 */
+	void complete() {
+				
 		// calculate average estimated effort per issue
 		estimatedEffortPerIssueAverage = sumOfEffortIssuesEstimatedTotal / numberOfIssuesEstimatedTotal
 		
@@ -149,6 +151,8 @@ class Report {
 			item.completed = item.effortIssuesDone / item.effortIssuesTotal
 			
 			Item release = getItem(item.release, releases)
+			release.release = item.release
+			release.name = "RELEASE: ${(item.release != null ?  item.release : 'not assigned')}"
 			release.issuesTotal += item.issuesTotal
 			release.issuesEstimated += item.issuesEstimated
 			release.issuesDone += item.issuesDone
@@ -162,6 +166,9 @@ class Report {
 		releases.values().each { item ->
 			item.completed = item.effortIssuesDone / item.effortIssuesTotal
 			
+			all.release = "ALL Rel."
+			all.name = "EVERYTHING" 
+			all.issuesTotal += item.issuesTotal
 			all.issuesTotal += item.issuesTotal
 			all.issuesEstimated += item.issuesEstimated
 			all.issuesDone += item.issuesDone
@@ -174,12 +181,12 @@ class Report {
 	
 	}
 	
-	void print() {
+	String toString() {
 		
-	    println "        |         | number| number| number|  effort |  effort |  effort |  effort | effort  |     "
-	    println "        |         | issues| issues| issues|  epic   |  issues |  issues |  issues | based   |     "
-	    println "     key|  release| total | estim.| done  |  estim. |  total  |  done   |  remain.| progress| name"
-		epics.values().each { item -> 
+		StringWriter stringWriter = new StringWriter()
+		PrintWriter printWriter = new PrintWriter(stringWriter)
+		
+		def printline = { item -> 
 			final String key = "${item.key}".padLeft(8)
 			final String release = "${item.release}".padLeft(8)
 			final String issuesTotal = "${item.issuesTotal}".padLeft(6)
@@ -191,44 +198,36 @@ class Report {
 			final String effortRemaining = "${item.effortRemaining.round(2)}".padLeft(8)
 			final String completed = "${item.completed.round(2)}".padLeft(8)
 			final String name = "${item.name}"
-			println "${key}, ${release}, ${issuesTotal}, ${issuesEstimated}, ${issuesDone}, ${effortEstimated}, ${effortIssuesTotal}, ${effortIssuesDone}, ${effortRemaining}, ${completed}, '${name}'"
+			printWriter.println "${key}, ${release}, ${issuesTotal}, ${issuesEstimated}, ${issuesDone}, ${effortEstimated}, ${effortIssuesTotal}, ${effortIssuesDone}, ${effortRemaining}, ${completed}, '${name}'"
 		}
-		releases.values().each { item -> 
-			final String key = "${item.key}".padLeft(8)
-			final String release = "RELEASE".padLeft(8)
-			final String issuesTotal = "${item.issuesTotal}".padLeft(6)
-			final String issuesEstimated = "${item.issuesEstimated}".padLeft(6)
-			final String issuesDone = "${item.issuesDone}".padLeft(6)
-			final String effortEstimated = "${item.effortEstimated.round(2)}".padLeft(8)
-			final String effortIssuesTotal = "${item.effortIssuesTotal.round(2)}".padLeft(8)
-			final String effortIssuesDone = "${item.effortIssuesDone.round(2)}".padLeft(8)
-			final String effortRemaining = "${item.effortRemaining.round(2)}".padLeft(8)
-			final String completed = "${item.completed.round(2)}".padLeft(8)
-			final String name = "RELEASE ${item.key}"
-			println "${key}', ${release}, ${issuesTotal}, ${issuesEstimated}, ${issuesDone}, ${effortEstimated}, ${effortIssuesTotal}, ${effortIssuesDone}, ${effortRemaining}, ${completed}, '${name}'"
-		}
-		[all].each { item -> 
-			final String key = "ALL".padLeft(8)
-			final String release = "ALL".padLeft(8)
-			final String issuesTotal = "${item.issuesTotal}".padLeft(6)
-			final String issuesEstimated = "${item.issuesEstimated}".padLeft(6)
-			final String issuesDone = "${item.issuesDone}".padLeft(6)
-			final String effortEstimated = "${item.effortEstimated.round(2)}".padLeft(8)
-			final String effortIssuesTotal = "${item.effortIssuesTotal.round(2)}".padLeft(8)
-			final String effortIssuesDone = "${item.effortIssuesDone.round(2)}".padLeft(8)
-			final String effortRemaining = "${item.effortRemaining.round(2)}".padLeft(8)
-			final String completed = "${item.completed.round(2)}".padLeft(8)
-			final String name = "ALL"
-			println "${key}', ${release}, ${issuesTotal}, ${issuesEstimated}, ${issuesDone}, ${effortEstimated}, ${effortIssuesTotal}, ${effortIssuesDone}, ${effortRemaining}, ${completed}, '${name}'"
-		}
-		println "number of issues estimated total = ${numberOfIssuesEstimatedTotal}"
-		println "sum of effort of estimated issues total = ${sumOfEffortIssuesEstimatedTotal}"
-		println "estimated effort per issue average = ${estimatedEffortPerIssueAverage}"
+		
+	    printWriter.println "        |         | number| number| number|  effort |  effort |  effort |  effort | effort  |     "
+	    printWriter.println "        |         | issues| issues| issues|  epic   |  issues |  issues |  issues | based   |     "
+	    printWriter.println "     key|  release| total | estim.| done  |  estim. |  total  |  done   |  remain.| progress| name"
+		epics.values().each printline
+		releases.values().each printline
+		[all].each printline
+		printWriter.println "number of issues estimated total = ${numberOfIssuesEstimatedTotal}"
+		printWriter.println "sum of effort of estimated issues total = ${sumOfEffortIssuesEstimatedTotal}"
+		printWriter.println "estimated effort per issue average = ${estimatedEffortPerIssueAverage}"
 		
 		
 //		println "#Epics = ${countEpics}"
 //		println "#UserStories = ${countUserStories}"
 //		println "#Defects = ${countDefects}"
 //		println "#Issues = ${countIssues}"
+		
+		return stringWriter.getBuffer().toString()
+	}
+	
+	static Report build(Object data) {
+		Report report = new Report();
+		
+		for(Object issue: data.issues) {
+			report.addIssue(new Report.Issue(issue))
+		}
+		
+		report.complete();
+		return report
 	}
 }
