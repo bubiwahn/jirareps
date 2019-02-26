@@ -17,7 +17,7 @@ class BacklogReportController {
 		println "JQL search: startAt=" + result.startAt + ",  maxResults=" + result.maxResults + ", total=" + result.total
 		
 		Report report = new Report();
-		for(Object issue: data.issues) {
+		for(Object issue: result.issues) {
 			report.addIssue(new Issue(issue))
 		}
 		report.complete();

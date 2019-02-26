@@ -54,8 +54,8 @@ class Report {
 			epic.issuesTotal++
 			epic.effortIssuesTotal += effortEstimated
 			switch(issue.status) {
-				case Report.Issue.Status.Completed:
-				case Report.Issue.Status.Cancelled:
+				case Issue.Status.Completed:
+				case Issue.Status.Cancelled:
 				    epic.issuesDone++
 	                epic.effortIssuesDone += effortEstimated		
 				    break

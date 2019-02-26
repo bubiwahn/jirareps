@@ -21,7 +21,8 @@ class JqlRequest {
 	final static String Type_Epic="Epic"
 	final static String Type_ImplementationTask="Implementation (Task)"
 	final static String Type_Defect="Defect"
-	final static String fields="${Report.FixVersions},${Report.Type},${Report.Epic_Link},${Report.Epic_Name},${Report.Estimated_Effort_Days},${Report.Status}"
+
+	final static String fields="${FixVersions},${Type},${Epic_Link},${Epic_Name},${Estimated_Effort_Days},${Status}"
 
 	static Object search(String jql, Integer startAt, Integer maxResults) throws IOException {
 		
