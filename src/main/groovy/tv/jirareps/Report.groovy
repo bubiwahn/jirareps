@@ -2,6 +2,9 @@ package tv.jirareps
 
 class Report {
 			
+	Integer numberOfItemsTotal = 0
+	Integer numberOfEpicsTotal = 0
+	Integer numberOfIssuesTotal = 0
 	Integer numberOfIssuesEstimatedTotal = 0
 	Double sumOfEffortIssuesEstimatedTotal = 0.0
 	Double estimatedEffortPerIssueAverage = 0.0
@@ -41,15 +44,18 @@ class Report {
 	 * @param issue issue to be added
 	 */
 	void addIssue(Issue issue) {
+		numberOfItemsTotal++
 		// println issue.key + ", " + issue.epicLink + ", " + issue.epicName + ", " + issue.estimatedEffortDays + ", " + issue.status + ", " + issue.type + ", " + issue.fixVersion 
 		final Double effortEstimated = issue.estimatedEffortDays != null ? issue.estimatedEffortDays : 0.0
 		if(issue.type == Issue.Type.Epic) {
+			numberOfEpicsTotal++;
 			Item epic = getItem(issue.key, epics)
 			epic.name = issue.epicName
 			epic.release = issue.fixVersion
 			epic.effortEstimated = effortEstimated 
 		}
 		else {
+			numberOfIssuesTotal++;
 			Item epic = getItem(issue.epicLink, epics)
 			epic.issuesTotal++
 			epic.effortIssuesTotal += effortEstimated
@@ -79,7 +85,10 @@ class Report {
 		estimatedEffortPerIssueAverage = sumOfEffortIssuesEstimatedTotal / numberOfIssuesEstimatedTotal
 		
 		// process epics
+		Integer numberOfIssuesTotalInEpics = 0
 		epics.values().each { item ->
+			
+			numberOfIssuesTotalInEpics += item.issuesTotal
 			
 			item.effortIssuesTotal += (item.issuesTotal - item.issuesEstimated) * estimatedEffortPerIssueAverage
 			item.effortRemaining = item.effortIssuesTotal - item.effortIssuesDone
@@ -95,15 +104,20 @@ class Report {
 			release.effortIssuesTotal += item.effortIssuesTotal
 			release.effortIssuesDone += item.effortIssuesDone
 			release.effortRemaining += item.effortRemaining
+		
 		}
-
+		assert(numberOfIssuesTotalInEpics == numberOfIssuesTotal)
+		
 		// process releases
+		Integer numberOfIssuesTotalInReleases = 0
 		releases.values().each { item ->
+					
+			numberOfIssuesTotalInReleases += item.issuesTotal
+
 			item.completed = item.effortIssuesDone / item.effortIssuesTotal
 			
 			all.release = "ALL Rel."
 			all.name = "EVERYTHING" 
-			all.issuesTotal += item.issuesTotal
 			all.issuesTotal += item.issuesTotal
 			all.issuesEstimated += item.issuesEstimated
 			all.issuesDone += item.issuesDone
@@ -111,7 +125,9 @@ class Report {
 			all.effortIssuesTotal += item.effortIssuesTotal
 			all.effortIssuesDone += item.effortIssuesDone
 		}
-
+		assert(numberOfIssuesTotalInReleases == numberOfIssuesTotal)
+		assert(all.issuesTotal == numberOfIssuesTotal)
+		
 		all.completed = all.effortIssuesDone / all.effortIssuesTotal
 	
 	}
@@ -146,6 +162,10 @@ class Report {
 		epics.values().each printline
 		releases.values().each printline
 		[all].each printline
+		
+		printWriter.println "number of items total = ${numberOfItemsTotal}"
+		printWriter.println "number of epics total = ${numberOfEpicsTotal}"
+		printWriter.println "number of issue total = ${numberOfIssuesTotal}"
 		printWriter.println "number of issues estimated total = ${numberOfIssuesEstimatedTotal}"
 		printWriter.println "sum of effort of estimated issues total = ${sumOfEffortIssuesEstimatedTotal}"
 		printWriter.println "estimated effort per issue average = ${estimatedEffortPerIssueAverage}"

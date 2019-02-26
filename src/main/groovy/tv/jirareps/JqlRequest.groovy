@@ -31,8 +31,10 @@ class JqlRequest {
 		}
 		Object result = invoke("search", "jql=" + jql.encodeURL(), "startAt=" + startAt.toString().encodeURL(), "maxResults=" + maxResults.toString().encodeURL(), "fields=" + fields.encodeURL())
 		
+		println "result: startAt=${result.startAt}, maxResults=${result.maxResults}, total=${result.total}"
 		if(maxResults < result.total)
 			throw new RuntimeException("Invocation result exceeds number of expected elements. Please implement a better solution in the BacklogReportController")
+
         return result    
 	}
 	
