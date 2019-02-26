@@ -1,10 +1,15 @@
-package tv.jirareps
+package tv.jirareps;
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.info.BuildProperties
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class BacklogReportController {
+
+	@Autowired
+	private BuildProperties buildProperties;
 
 	@RequestMapping(path="/tbReport")
 	public String tbReport() {
@@ -21,6 +26,8 @@ class BacklogReportController {
 			report.addIssue(new Issue(issue))
 		}
 		report.complete();
-		return report.toString()
+		String buildVersion = buildProperties != null ? buildProperties.getVersion() : null
+		String buildTime = buildProperties != null ? buildProperties.getTime() : null
+		return "<html><pre>\nBacklog Report Version '" + buildVersion + "' built at '" + buildTime + "' ...\n" + report.toString() + "\n</pre></html>"
 	}
 }

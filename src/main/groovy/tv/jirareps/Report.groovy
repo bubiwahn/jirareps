@@ -1,7 +1,7 @@
 package tv.jirareps
 
 class Report {
-			
+				
 	Integer numberOfItemsTotal = 0
 	Integer numberOfEpicsTotal = 0
 	Integer numberOfIssuesTotal = 0
@@ -155,7 +155,6 @@ class Report {
 			printWriter.println "${key}, ${release}, ${issuesTotal}, ${issuesEstimated}, ${issuesDone}, ${effortEstimated}, ${effortIssuesTotal}, ${effortIssuesDone}, ${effortRemaining}, ${completed}, '${name}'"
 		}
 		
-		printWriter.println "<html><pre>"
 	    printWriter.println "        |         | number| number| number|  effort |  effort |  effort |  effort | effort  |     "
 	    printWriter.println "        |         | issues| issues| issues|  epic   |  issues |  issues |  issues | based   |     "
 	    printWriter.println "     key|  release| total | estim.| done  |  estim. |  total  |  done   |  remain.| progress| name"
@@ -169,7 +168,6 @@ class Report {
 		printWriter.println "number of issues estimated total = ${numberOfIssuesEstimatedTotal}"
 		printWriter.println "sum of effort of estimated issues total = ${sumOfEffortIssuesEstimatedTotal}"
 		printWriter.println "estimated effort per issue average = ${estimatedEffortPerIssueAverage}"
-		printWriter.println "</pre></html>"
 		
 		
 //		println "#Epics = ${countEpics}"
