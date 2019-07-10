@@ -4,8 +4,7 @@ import groovy.json.JsonSlurper
 
 class JqlRequest {
 	
-	final static String base = "http://jira/rest/api/2/"
-	
+	final static String base = "https://jira.app.msg-life.com/rest/api/2/"
 	final static String Epic_Link="customfield_11631"
 	final static String Epic_Name="customfield_11633"
 	final static String Estimated_Effort_Days="customfield_10702"
@@ -20,6 +19,8 @@ class JqlRequest {
 	final static String Type="issuetype"
 	final static String Type_Epic="Epic"
 	final static String Type_ImplementationTask="Implementation (Task)"
+	final static String Type_SpecificationTask="Specification (Task)"
+	final static String Type_AnalysisTask="Analysis (Task)"
 	final static String Type_Defect="Defect"
 
 	final static String fields="${FixVersions},${Type},${Epic_Link},${Epic_Name},${Estimated_Effort_Days},${Status}"
