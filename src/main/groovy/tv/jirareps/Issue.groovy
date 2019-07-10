@@ -34,12 +34,12 @@ class Issue {
 		String type = fields.getAt(JqlRequest.Type).name
 		if (type.startsWith(JqlRequest.Type_Epic))
 			this.type = Type.Epic 
-		else if (type.startsWith(JqlRequest.Type_ImplementationTask))
+		else if (type.startsWith(JqlRequest.Type_ImplementationTask) || type.startsWith(JqlRequest.Type_SpecificationTask) || type.startsWith(JqlRequest.Type_AnalysisTask))
 			this.type = Type.UserStory
 		else if(type.startsWith(JqlRequest.Type_Defect))
 			this.type = Type.Defect
 		else
-			throw new Exception("IllegalType");
+			throw new Exception("IllegalType: $type");
 			
 		String status = fields.getAt(JqlRequest.Status).name
 		String resolution = fields.getAt(JqlRequest.Resolution)
